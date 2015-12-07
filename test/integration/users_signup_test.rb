@@ -24,5 +24,6 @@ class UsersSignupTest < ActionDispatch::IntegrationTest
     end
     assert_template 'users/show'
     assert_select 'div.alert-success'
+    assert_not flash.blank?, "flash msg should not be empty"
   end
 end
