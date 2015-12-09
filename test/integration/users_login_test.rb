@@ -11,9 +11,12 @@ class UsersLoginTest < ActionDispatch::IntegrationTest
     # use flash.now to solve that problem
     get login_path
     assert_template 'sessions/new'
+    # post invalid params (login credentials) to sessions#create
     post login_path session: {email: '', password: '' }
-    assert_template 'sessions/new'
+    assert_template 'sessions/new'  # re-renders login page
     assert_not flash.empty?, 'flash msg should not be empty'
+    # test that flash is not shown again if user follows another link
+    #  (this problem is solved by using flash.now)
     get root_path
     assert flash.empty?, 'flash msg should be empty'
   end
@@ -21,7 +24,7 @@ class UsersLoginTest < ActionDispatch::IntegrationTest
   test "login with valid information followed by logout" do
     get login_path
     post login_path, session: { email: @user.email, password: 'password' }
-    assert is_logged_in?
+    assert is_logged_in?  # method defined in test_helper.rb
     assert_redirected_to @user
     follow_redirect!
     assert_template 'users/show'
@@ -31,7 +34,7 @@ class UsersLoginTest < ActionDispatch::IntegrationTest
     delete logout_path
     assert_not is_logged_in?
     assert_redirected_to root_url
-    # Simulate a user clicking logout in a second window.
+    # Simulate a user clicking logout in a second browser window.
     delete logout_path
     follow_redirect!
     assert_select "a[href=?]", login_path
